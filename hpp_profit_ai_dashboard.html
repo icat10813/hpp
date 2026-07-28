@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard HPP & Profit Seragam</title>
+  
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <!-- Import html2pdf untuk Export PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --text-accent: #2563eb;
+      --text-success: #15803d;
+      --text-danger: #b91c1c;
+      --text-warning: #b45309;
+      --bg-accent: #eff6ff;
+      --bg-success: #dcfce7;
+      --bg-danger: #fee2e2;
+      --bg-warning: #fef3c7;
+      --surface-0: #f3f4f6;
+      --surface-1: #ffffff;
+      --surface-2: #ffffff;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --border-accent: #3b82f6;
+      --fill-accent: #2563eb;
+      --fill-accent-hover: #1d4ed8;
+      --fill-success: #22c55e;
+      --fill-danger: #ef4444;
+      --on-accent: #ffffff;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      background-color: var(--surface-0);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .app { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem; background: var(--surface-1);
+      padding: 1rem 1.5rem; border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .tabs {
+      display: flex; gap: 8px; margin-bottom: 1.25rem;
+      background: var(--surface-1); padding: 6px; border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .tab {
+      flex: 1; padding: 10px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; background: transparent;
+      color: var(--text-secondary); border-radius: 6px;
+      transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    
+    .tab:hover { background: var(--surface-0); color: var(--text-primary); }
+    .tab.active { background: var(--fill-accent); color: var(--on-accent); box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+    
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; margin-bottom: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    }
+    
+    .row { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
+    .field label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+    
+    input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong);
+      border-radius: 8px; background: var(--surface-1);
+      color: var(--text-primary); font-size: 14px; font-family: var(--font-sans);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus { outline: none; border-color: var(--border-accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+    
+    .section-title {
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    
+    .btn {
+      padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--border-strong);
+      background: var(--surface-1); color: var(--text-primary);
+      transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn:hover { background: var(--surface-0); border-color: var(--text-secondary); }
+    .btn-primary { background: var(--fill-accent); color: var(--on-accent); border-color: var(--fill-accent); }
+    .btn-primary:hover { background: var(--fill-accent-hover); border-color: var(--fill-accent-hover); transform: translateY(-1px); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat {
+      background: var(--surface-1); border-radius: 12px; padding: 16px;
+      border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      text-align: center;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+    .stat-value { font-size: 20px; font-weight: 700; }
+    .stat-value.green { color: var(--text-success); }
+    .stat-value.red { color: var(--text-danger); }
+    .stat-value.blue { color: var(--text-accent); }
+    
+    .project-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .project-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .proj-name { font-size: 14px; font-weight: 600; margin-bottom: 4px;}
+    .proj-detail { font-size: 12px; color: var(--text-secondary); }
+    .proj-profit { font-size: 15px; font-weight: 700; text-align: right; margin-bottom: 4px;}
+    .proj-margin { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;}
+    
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-green { background: var(--bg-success); color: var(--text-success); }
+    .badge-red { background: var(--bg-danger); color: var(--text-danger); }
+    
+    .ai-bubble {
+      background: var(--bg-accent); border: 1px solid var(--border-accent);
+      border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.6;
+      color: var(--text-primary); margin-bottom: 12px; box-shadow: 0 2px 5px rgba(37,99,235,0.1);
+    }
+    .ai-bubble .ai-label {
+      font-size: 12px; font-weight: 700; color: var(--text-accent);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    
+    .loading-dots { display: inline-flex; gap: 4px; padding: 8px 0; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-accent); animation: blink 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; transform: translateY(-2px); } }
+    
+    .opex-row, .bahan-item { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .opex-row input.name, .bahan-item input.name { flex: 2; }
+    .opex-row input.amt, .bahan-item input.amt { flex: 1; text-align: right; }
+    .btn-delete {
+      background: var(--bg-danger); border: none; cursor: pointer; color: var(--text-danger);
+      width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { background: var(--text-danger); color: white; }
+    
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    
+    .ai-chat-input { display: flex; gap: 8px; margin-top: 16px; }
+    .ai-chat-input input { flex: 1; }
+    
+    .msg-me {
+      background: var(--surface-1); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px; font-size: 14px;
+      margin-bottom: 12px; text-align: right; margin-left: 40px;
+    }
+    .ai-history { max-height: 400px; overflow-y: auto; margin-bottom: 12px; padding-right: 8px; }
+    .ai-history::-webkit-scrollbar { width: 6px; }
+    .ai-history::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+    
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 14px; }
+    
+    .progress-bar { height: 6px; background: var(--surface-0); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+    .progress-fill.green { background: var(--fill-success); }
+    .progress-fill.red { background: var(--fill-danger); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TEMPLATE PDF TERSEMBUNYI -->
+  <div id="pdf-template" style="display: none; padding: 30px; font-family: 'Inter', sans-serif; color: #1e293b; background: white;">
+    <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px;">
+      <h1 style="font-size: 24px; color: #4f46e5; margin: 0;">Laporan Keuangan Project Seragam</h1>
+      <p style="font-size: 14px; color: #64748b; margin-top: 5px;">Dicetak pada: <span id="pdf-date"></span></p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+      <div style="text-align: center;">
+        <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Total Profit Kotor</div>
+        <div style="font-size: 18px; font-weight: bold; color: #4f46e5;" id="pdf-profit">Rp 0</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Total Biaya Ops</div>
+        <div style="font-size: 18px; font-weight: bold; color: #dc2626;" id="pdf-opex">Rp 0</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Laba Bersih</div>
+        <div style="font-size: 18px; font-weight: bold; color: #16a34a;" id="pdf-laba">Rp 0</div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 16px; margin-bottom: 10px; color: #1e293b;">Rincian Project</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <thead>
+        <tr style="background-color: #4f46e5; color: white; text-align: left;">
+          <th style="padding: 10px; border: 1px solid #e2e8f0;">Nama Project</th>
+          <th style="padding: 10px; border: 1px solid #e2e8f0;">Bulan</th>
+          <th style="padding: 10px; border: 1px solid #e2e8f0;">Qty</th>
+          <th style="padding: 10px; border: 1px solid #e2e8f0;">Total HPP</th>
+          <th style="padding: 10px; border: 1px solid #e2e8f0;">Profit</th>
+        </tr>
+      </thead>
+      <tbody id="pdf-table-body">
+        <!-- Data tabel akan diisi otomatis lewat JS -->
+      </tbody>
+    </table>
+    
+    <div style="margin-top: 30px; font-size: 11px; text-align: center; color: #94a3b8;">
+      Laporan ini di-generate secara otomatis oleh Sistem HPP & Profit.
+    </div>
+  </div>
+
+  <div class="header">
+    <div>
+      <div style="font-size:18px;font-weight:700; display:flex; align-items:center; gap:8px;">
+        <i class="ti ti-chart-pie" style="color:var(--text-accent);"></i> HPP & Profit Seragam
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary); margin-top: 4px;">Data tersimpan otomatis di browser</div>
+    </div>
+    <button class="btn" onclick="exportData()"><i class="ti ti-download" aria-hidden="true"></i> Export</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('input',this)"><i class="ti ti-plus" aria-hidden="true"></i> Input Project</button>
+    <button class="tab" onclick="switchTab('rekap',this)"><i class="ti ti-chart-bar" aria-hidden="true"></i> Rekap Bulanan</button>
+    <button class="tab" onclick="switchTab('ai',this)"><i class="ti ti-robot" aria-hidden="true"></i> Analisis AI</button>
+  </div>
+
+  <!-- TAB 1: INPUT PROJECT -->
+  <div id="panel-input" class="panel active">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-file-info"></i> Info Project</div>
+      <div class="row">
+        <div class="field"><label>Nama Project</label><input id="proj-nama" placeholder="cth: Seragam SMA Nusantara"></div>
+        <div class="field" style="flex: 0 0 160px;"><label>Bulan Pelaksanaan</label><input id="proj-bulan" placeholder="cth: Juli 2026"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Jumlah Pcs</label><input id="proj-qty" type="number" placeholder="50" min="1" oninput="autoHitungHargaJual()"></div>
+        <div class="field" style="flex: 0 0 130px;"><label>Target Margin (%)</label><input id="proj-target-margin" type="number" value="30" placeholder="30" oninput="autoHitungHargaJual()"></div>
+        <div class="field"><label>Harga Jual / pcs (Rp)</label><input id="proj-jual" type="number" placeholder="150000" oninput="hitungPreview()"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><i class="ti ti-cash"></i> Komponen Biaya (Total)</div>
+      <div id="bahan-list"></div>
+      <button class="btn btn-sm" onclick="tambahBahan()" style="margin-top:4px;"><i class="ti ti-plus"></i> Tambah Baris Biaya</button>
+
+      <div class="divider"></div>
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13px;color:var(--text-secondary); font-weight:600;">Total HPP</div>
+          <div style="font-size:24px;font-weight:700;" id="preview-hpp">Rp 0</div>
+          <div style="font-size:12px;color:var(--text-muted); font-weight:500;" id="preview-hpp-pcs">Rp 0 / pcs</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:var(--text-secondary); font-weight:600;">Estimasi Profit</div>
+          <div style="font-size:24px;font-weight:700;" id="preview-profit" class="green">Rp 0</div>
+          <div style="font-size:12px;color:var(--text-muted); font-weight:500;" id="preview-margin">0% margin</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-primary" style="flex:1; padding: 12px; font-size: 15px;" onclick="simpanProject()">
+        <i class="ti ti-device-floppy" aria-hidden="true"></i> Simpan Project
+      </button>
+      <button class="btn" style="padding: 12px;" onclick="resetForm()">Reset</button>
+    </div>
+    <div id="msg-simpan" style="font-size:13px; font-weight:600; text-align:center; margin-top:12px; min-height:20px;"></div>
+  </div>
+
+  <!-- TAB 2: REKAP BULANAN -->
+  <div id="panel-rekap" class="panel">
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat"><div class="stat-label">Total Profit Kotor</div><div class="stat-value blue" id="stat-profit-kotor">Rp 0</div></div>
+      <div class="stat"><div class="stat-label">Total Biaya Ops</div><div class="stat-value red" id="stat-opex">Rp 0</div></div>
+      <div class="stat"><div class="stat-label">Laba Bersih</div><div class="stat-value green" id="stat-laba">Rp 0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><i class="ti ti-wallet"></i> Biaya Operasional (Opex) Bulanan</div>
+      <div id="opex-list"></div>
+      <button class="btn btn-sm" onclick="tambahOpex()" style="margin-top: 4px;"><i class="ti ti-plus"></i> Tambah Pengeluaran</button>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;">
+        <span>Total Biaya Operasional</span>
+        <span id="total-opex-label" style="color: var(--text-danger);">Rp 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><i class="ti ti-list-check"></i> Daftar Project Tersimpan</div>
+      <div id="project-list-rekap"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: AI ANALYST -->
+  <div id="panel-ai" class="panel">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-sparkles"></i> Asisten AI Bisnis (Simulasi)</div>
+      <div class="ai-history" id="ai-history">
+        <div class="empty">
+          <i class="ti ti-robot" style="font-size:42px;display:block;margin-bottom:12px; color: var(--text-muted)" aria-hidden="true"></i>
+          Tanyakan apa saja seputar optimalisasi profit dan margin bisnis seragam Anda.
+        </div>
+      </div>
+      <div class="ai-chat-input">
+        <input id="ai-input" placeholder="cth: Bagaimana cara menaikkan margin profit?" onkeydown="if(event.key==='Enter')kirimAI()">
+        <button class="btn btn-primary" onclick="kirimAI()">Kirim <i class="ti ti-send"></i></button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;">
+        <button class="btn btn-sm" onclick="quickAsk('Analisis total profit dan margin bulan ini')">Analisis profit</button>
+        <button class="btn btn-sm" onclick="quickAsk('Biaya mana yang bisa dihemat?')">Hemat biaya</button>
+        <button class="btn btn-sm" onclick="quickAsk('Berikan saran strategi harga jual')">Strategi Harga</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DB_KEY = 'hpp_seragam_v1';
+
+function loadDB(){
+  try{ return JSON.parse(localStorage.getItem(DB_KEY)||'{"projects":[],"opex":[]}') }
+  catch(e){ return {projects:[],opex:[]} }
+}
+function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)) }
+
+let db = loadDB();
+let bahanRows = [];
+
+function fmt(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID') }
+
+function switchTab(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='rekap') renderRekap();
+}
+
+function tambahBahan(nama='',amt=0){
+  const id = Date.now()+Math.random();
+  bahanRows.push({id,nama,amt});
+  renderBahan();
+}
+
+function hapusBahan(id){
+  bahanRows = bahanRows.filter(r=>r.id!==id);
+  renderBahan();
+}
+
+function renderBahan(){
+  const el = document.getElementById('bahan-list');
+  el.innerHTML = bahanRows.map(r=>`
+    <div class="bahan-item">
+      <input class="name" placeholder="Nama bahan (cth: Kain Katun)" value="${r.nama}" oninput="updateBahan(${r.id},'nama',this.value)">
+      <input class="amt" type="number" placeholder="Rp 0" value="${r.amt||''}" oninput="updateBahan(${r.id},'amt',this.value)">
+      <button class="btn-delete" onclick="hapusBahan(${r.id})" title="Hapus"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+  autoHitungHargaJual();
+}
+
+function updateBahan(id,field,val){
+  const row = bahanRows.find(r=>r.id===id);
+  if(row){ row[field] = field==='amt' ? (parseFloat(val)||0) : val; }
+  autoHitungHargaJual();
+}
+
+// Fungsi Otomatisasi Harga Jual berdasarkan Qty, HPP, & Target Margin
+function autoHitungHargaJual() {
+  const hpp = bahanRows.reduce((s, r) => s + (r.amt || 0), 0);
+  const qty = parseInt(document.getElementById('proj-qty').value) || 0;
+  const targetMarginInput = parseFloat(document.getElementById('proj-target-margin').value);
+  const targetMargin = isNaN(targetMarginInput) ? 0.30 : (targetMarginInput / 100);
+
+  if (qty > 0 && hpp > 0) {
+    const hppPcs = hpp / qty;
+    
+    // Formula: Harga Jual = HPP / (1 - Target Margin)
+    let hargaRekomendasi = targetMargin < 1 ? (hppPcs / (1 - targetMargin)) : (hppPcs * 1.3);
+    
+    // Pembulatan ke ribuan terdekat (contoh: Rp 142.857 menjadi Rp 143.000)
+    hargaRekomendasi = Math.ceil(hargaRekomendasi / 1000) * 1000;
+    
+    document.getElementById('proj-jual').value = hargaRekomendasi;
+  }
+  hitungPreview();
+}
+
+function hitungPreview(){
+  const hpp = bahanRows.reduce((s,r)=>s+(r.amt||0),0);
+  const qty = parseInt(document.getElementById('proj-qty').value)||1;
+  const jual = (parseFloat(document.getElementById('proj-jual').value)||0)*qty;
+  const profit = jual - hpp;
+  const margin = jual>0 ? (profit/jual*100) : 0;
+  
+  document.getElementById('preview-hpp').textContent = fmt(hpp);
+  document.getElementById('preview-hpp-pcs').textContent = fmt(hpp/qty)+' / pcs';
+  
+  const pEl = document.getElementById('preview-profit');
+  pEl.textContent = fmt(profit);
+  pEl.className = profit >= 0 ? 'green' : 'red';
+  document.getElementById('preview-margin').textContent = margin.toFixed(1)+'% margin profit';
+}
+
+function simpanProject(){
+  const nama = document.getElementById('proj-nama').value.trim();
+  const bulan = document.getElementById('proj-bulan').value.trim();
+  const qty = parseInt(document.getElementById('proj-qty').value)||0;
+  const jualPcs = parseFloat(document.getElementById('proj-jual').value)||0;
+  
+  if(!nama||!bulan||!qty||!jualPcs||bahanRows.length===0){
+    document.getElementById('msg-simpan').textContent = '⚠️ Lengkapi semua field terlebih dahulu.';
+    document.getElementById('msg-simpan').style.color='var(--text-danger)';
+    return;
+  }
+  
+  const hpp = bahanRows.reduce((s,r)=>s+(r.amt||0),0);
+  const totalJual = jualPcs*qty;
+  const profit = totalJual - hpp;
+  
+  db.projects.push({id:Date.now(),nama,bulan,qty,jualPcs,hpp,totalJual,profit,bahan:[...bahanRows],ts:new Date().toISOString()});
+  saveDB(db);
+  
+  document.getElementById('msg-simpan').textContent = '✓ Project berhasil disimpan ke rekap!';
+  document.getElementById('msg-simpan').style.color='var(--text-success)';
+  setTimeout(()=>document.getElementById('msg-simpan').textContent='',3000);
+  resetForm();
+}
+
+function resetForm(){
+  document.getElementById('proj-nama').value='';
+  document.getElementById('proj-bulan').value='';
+  document.getElementById('proj-qty').value='';
+  document.getElementById('proj-jual').value='';
+  document.getElementById('proj-target-margin').value='30';
+  bahanRows=[];
+  tambahBahan('Kain (Meter)',0);
+  tambahBahan('Kancing / Resleting',0);
+  tambahBahan('Jasa Jahit / CMT',0);
+  tambahBahan('Listrik',0);
+  tambahBahan('Air / PAM',0);
+}
+
+// OPEX
+function tambahOpex(nama='',amt=0){
+  const id = Date.now()+Math.random();
+  db.opex.push({id,nama,amt});
+  saveDB(db);
+  renderOpex();
+}
+
+function hapusOpex(id){
+  db.opex = db.opex.filter(o=>o.id!==id);
+  saveDB(db);
+  renderOpex();
+}
+
+function renderOpex(){
+  const el = document.getElementById('opex-list');
+  el.innerHTML = db.opex.map(o=>`
+    <div class="opex-row">
+      <input class="name" placeholder="Nama Biaya (cth: Sewa Tempat)" value="${o.nama}" oninput="updateOpex(${o.id},'nama',this.value)">
+      <input class="amt" type="number" placeholder="Rp 0" value="${o.amt||''}" oninput="updateOpex(${o.id},'amt',this.value)">
+      <button class="btn-delete" onclick="hapusOpex(${o.id})" title="Hapus"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+  hitungOpex();
+}
+
+function updateOpex(id,field,val){
+  const o = db.opex.find(x=>x.id===id);
+  if(o){ o[field]=field==='amt'?(parseFloat(val)||0):val; saveDB(db); }
+  hitungOpex();
+}
+
+function hitungOpex(){
+  const total = db.opex.reduce((s,o)=>s+(o.amt||0),0);
+  const el = document.getElementById('total-opex-label');
+  if(el) el.textContent = fmt(total);
+}
+
+function hapusProject(id) {
+  if(confirm("Apakah Anda yakin ingin menghapus project ini? Data yang dihapus tidak bisa dikembalikan.")) {
+    db.projects = db.projects.filter(p => p.id !== id);
+    saveDB(db);
+    renderRekap(); 
+  }
+}
+
+function renderRekap(){
+  renderOpex();
+  const totalProfit = db.projects.reduce((s,p)=>s+(p.profit||0),0);
+  const totalOpex = db.opex.reduce((s,o)=>s+(o.amt||0),0);
+  const laba = totalProfit - totalOpex;
+  
+  document.getElementById('stat-profit-kotor').textContent = fmt(totalProfit);
+  document.getElementById('stat-opex').textContent = fmt(totalOpex);
+  
+  const labaEl = document.getElementById('stat-laba');
+  labaEl.textContent = fmt(laba);
+  labaEl.className = 'stat-value ' + (laba >= 0 ? 'green' : 'red');
+
+  const list = document.getElementById('project-list-rekap');
+  if(db.projects.length===0){
+    list.innerHTML='<div class="empty"><i class="ti ti-folder-off" style="font-size:32px; display:block; margin-bottom:8px;"></i>Belum ada project yang disimpan</div>';
+    return;
+  }
+  
+  list.innerHTML = db.projects.map(p=>{
+    const margin = p.totalJual>0?(p.profit/p.totalJual*100):0;
+    const badge = p.profit>0
+      ? `<span class="badge badge-green">Untung</span>`
+      : `<span class="badge badge-red">Rugi</span>`;
+    const barPct = Math.min(100,Math.max(0,margin));
+    
+    return `<div class="project-item">
+      <div style="flex: 1;">
+        <div class="proj-name">${p.nama} ${badge}</div>
+        <div class="proj-detail">${p.bulan} • ${p.qty} pcs • HPP ${fmt(p.hpp)}</div>
+        <div class="progress-bar" style="width: 80%; max-width: 200px;">
+          <div class="progress-fill ${p.profit>=0?'green':'red'}" style="width:${barPct}%"></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="proj-profit" style="color:${p.profit>=0?'var(--text-success)':'var(--text-danger)'}">${fmt(p.profit)}</div>
+        <div class="proj-margin">${margin.toFixed(1)}% margin</div>
+        <button onclick="hapusProject(${p.id})" style="background:none; border:none; color:var(--text-danger); cursor:pointer; margin-left:8px; padding:4px;" title="Hapus Project">
+          <i class="ti ti-trash" style="font-size:16px;"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// AI CHAT MOCK SIMULATION
+function quickAsk(q){
+  const hist = document.getElementById('ai-history');
+  const emptyEl = hist.querySelector('.empty');
+  if(emptyEl) emptyEl.remove();
+
+  hist.innerHTML += `<div class="msg-me">${q}</div>`;
+
+  const dotId = 'dots_'+Date.now();
+  hist.innerHTML += `<div class="ai-bubble" id="${dotId}">
+    <div class="ai-label"><i class="ti ti-robot"></i> AI Analyst memproses data...</div>
+    <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>`;
+  hist.scrollTop = hist.scrollHeight;
+
+  setTimeout(() => {
+    const totalProfit = db.projects.reduce((s,p)=>s+(p.profit||0),0);
+    const totalOpex = db.opex.reduce((s,o)=>s+(o.amt||0),0);
+    const marginStatus = totalProfit > totalOpex ? 'Bisnis Anda sedang berjalan positif.' : 'Sepertinya ada tekanan pada biaya operasional Anda bulan ini.';
+    
+    let mockResponse = `Halo! Berdasarkan data yang saya baca, total profit kotor Anda adalah <b>${fmt(totalProfit)}</b> dan pengeluaran operasional <b>${fmt(totalOpex)}</b>. ${marginStatus} <br><br>Saran saya: Terus pantau rasio harga jual agar margin profit seragam minimal menyentuh 30-40% per project.`;
+    
+    const dotEl = document.getElementById(dotId);
+    if(dotEl) dotEl.innerHTML = `<div class="ai-label"><i class="ti ti-robot"></i> AI Analyst</div>${mockResponse}`;
+    hist.scrollTop = hist.scrollHeight;
+  }, 1500);
+}
+
+function kirimAI(){
+  const input = document.getElementById('ai-input');
+  const q = input.value.trim();
+  if(!q) return;
+  input.value='';
+  quickAsk(q);
+}
+
+function exportData() {
+  const totalProfit = db.projects.reduce((s,p) => s + (p.profit||0), 0);
+  const totalOpex = db.opex.reduce((s,o) => s + (o.amt||0), 0);
+  const laba = totalProfit - totalOpex;
+
+  const now = new Date();
+  document.getElementById('pdf-date').textContent = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID');
+  document.getElementById('pdf-profit').textContent = fmt(totalProfit);
+  document.getElementById('pdf-opex').textContent = fmt(totalOpex);
+  document.getElementById('pdf-laba').textContent = fmt(laba);
+
+  const tbody = document.getElementById('pdf-table-body');
+  
+  if (db.projects.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:15px; text-align:center; color:#64748b;">Belum ada data project</td></tr>`;
+  } else {
+    tbody.innerHTML = db.projects.map(p => {
+      const isUntung = p.profit >= 0;
+      return `
+        <tr>
+          <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: 500;">${p.nama}</td>
+          <td style="padding: 10px; border: 1px solid #e2e8f0;">${p.bulan}</td>
+          <td style="padding: 10px; border: 1px solid #e2e8f0;">${p.qty} pcs</td>
+          <td style="padding: 10px; border: 1px solid #e2e8f0;">${fmt(p.hpp)}</td>
+          <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; color: ${isUntung ? '#16a34a' : '#dc2626'}">
+            ${fmt(p.profit)}
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  const element = document.getElementById('pdf-template');
+  element.style.display = 'block';
+
+  const opt = {
+    margin:       10,
+    filename:     `Laporan_HPP_${now.getTime()}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    element.style.display = 'none';
+  });
+}
+
+// Inisialisasi awal
+if(bahanRows.length === 0){
+  tambahBahan('Kain (Meter)', 0);
+  tambahBahan('Kancing / Resleting', 0);
+  tambahBahan('Jasa Jahit / CMT', 0);
+  tambahBahan('Listrik', 0);
+  tambahBahan('Air / PAM', 0);
+}
+
+if(db.opex.length===0){
+  db.opex = [
+    {id:1,nama:'Sewa Tempat',amt:0},{id:2,nama:'Listrik (PLN)',amt:0},
+    {id:3,nama:'Internet / Pulsa',amt:0},{id:4,nama:'Transportasi',amt:0}
+  ];
+  saveDB(db);
+}
+</script>
+</body>
+</html>
